@@ -1,5 +1,5 @@
 # PascalString
-保持老的pascal string机制，兼容delphi xe各种版本
 
-
-保持老的pascal string机制，兼容delphi xe各种版本，兼容fpc
+保持老的pascal string机制，兼容delphi 2009以后版本
+兼容fpc $Mode OBJFPC,$Mode Delphi,$Mode DelphiUnicode
+qq600585
