@@ -20,5 +20,7 @@
 
 {$WARNINGS OFF}
 {$HINTS OFF}
-
+{$H+} {long string}
+{$R-} {range check}
+{$A+} {Word Align Data}
 

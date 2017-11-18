@@ -1,3 +1,9 @@
+{ *****************************************************************************}
+{ * string support,writen by QQ 600585@qq.com                                 *}
+{* https://github.com/PassByYou888/CoreCipher                                 *}
+(* https://github.com/PassByYou888/ZServer4D                                  *)
+{******************************************************************************}
+
 unit PascalStrings;
 
 {$I ZDefine.inc}
@@ -17,7 +23,7 @@ type
 type
   PPascalString = ^TPascalString;
 
-  TPascalString = record
+  TPascalString = packed record
   private
     function GetText: SystemString;
     procedure SetText(const Value: SystemString);
@@ -79,6 +85,8 @@ type
     function GetString(bPos, ePos: Integer): TPascalString;
     procedure Insert(AText: SystemString; idx: Integer);
 
+    procedure AsText(var Output: SystemString);
+
     property Text: SystemString read GetText write SetText;
     function LowerText: SystemString;
     function UpperText: SystemString;
@@ -100,8 +108,12 @@ function CharIn(c: SystemChar; const SomeCharsets: TOrdChars; const SomeChars: T
 function BytesOfPascalString(var s: TPascalString): TBytes; overload;
 function PascalStringOfBytes(var s: TBytes): TPascalString; overload;
 
-function FastHashSystemString(s: PSystemString): THash; inline;
-function FastHash64SystemString(s: PSystemString): THash64; inline;
+function FastHashSystemString(s: PSystemString): THash; overload; inline;
+function FastHash64SystemString(s: PSystemString): THash64; overload; inline;
+
+function FastHashSystemString(s: SystemString): THash; overload; inline;
+function FastHash64SystemString(s: SystemString): THash64; overload; inline;
+
 function FastHashPascalString(s: PPascalString): THash; inline;
 function FastHash64PascalString(s: PPascalString): THash64; inline;
 
@@ -111,13 +123,13 @@ operator := (const s: Variant)r: TPascalString;
 
 operator := (const s: AnsiString)r: TPascalString;
 operator := (const s: UnicodeString)r: TPascalString;
-operator := (const s: SystemString)r: TPascalString;
+operator := (const s: ShortString)r: TPascalString;
 
 operator := (const c: SystemChar)r: TPascalString;
 
 operator := (const s: TPascalString)r: AnsiString;
 operator := (const s: TPascalString)r: UnicodeString;
-operator := (const s: TPascalString)r: SystemString;
+operator := (const s: TPascalString)r: ShortString;
 operator := (const s: TPascalString)r: Variant;
 
 operator = (const A: TPascalString; const B: TPascalString): Boolean;
@@ -283,6 +295,16 @@ begin
     end;
 end;
 
+function FastHashSystemString(s: SystemString): THash;
+begin
+  Result := FastHashSystemString(@s);
+end;
+
+function FastHash64SystemString(s: SystemString): THash64;
+begin
+  Result := FastHash64SystemString(@s);
+end;
+
 function FastHashPascalString(s: PPascalString): THash;
 const
   A = ord('A');
@@ -339,7 +361,7 @@ begin
   r.Text := s;
 end;
 
-operator := (const s: SystemString)r: TPascalString;
+operator := (const s: ShortString)r: TPascalString;
 begin
   r.Text := s;
 end;
@@ -354,17 +376,17 @@ begin
   r := s.Text;
 end;
 
-operator := (const s: TPascalString)r: Variant;
-begin
-  r := s.Text;
-end;
-
 operator := (const s: TPascalString)r: UnicodeString;
 begin
   r := s.Text;
 end;
 
-operator := (const s: TPascalString)r: SystemString;
+operator := (const s: TPascalString)r: ShortString;
+begin
+  r := s.Text;
+end;
+
+operator := (const s: TPascalString)r: Variant;
 begin
   r := s.Text;
 end;
@@ -476,9 +498,9 @@ end;
 procedure TPascalString.SetBytes(const Value: TBytes);
 {$IFDEF FPC}
 var
-  n:string;
+  n: string;
 begin
-  n:=SysUtils.TEncoding.Default.ClassName;
+  n := SysUtils.TEncoding.Default.ClassName;
 
   Text := StringOf(SysUtils.TEncoding.Convert(SysUtils.TEncoding.UTF8, SysUtils.TEncoding.Default, Value));
 end;
@@ -802,6 +824,21 @@ end;
 procedure TPascalString.Insert(AText: SystemString; idx: Integer);
 begin
   Text := GetString(1, idx) + AText + GetString(idx + 1, Len);
+end;
+
+procedure TPascalString.AsText(var Output: SystemString);
+var
+  i: Integer;
+begin
+  SetLength(Output, Len);
+  for i := 0 to Len - 1 do
+    begin
+      {$IFDEF FirstCharInZero}
+      Output[i] := Buff[i];
+      {$ELSE}
+      Output[i + 1] := Buff[i];
+      {$ENDIF}
+    end;
 end;
 
 function TPascalString.LowerText: SystemString;
