@@ -1,12 +1,39 @@
 # PascalString
 
-老的pascal string机制，方便移植时使用
+
+supports platform Win32, Win64, OSX, iOS and Android.
 
 
-兼容delphi 2009以后的所有Delphi版本，兼容Android,IOS,OSX
+
+## Usage TPascalString
+
+```Delphi
+
+var
+  s:string;
+  c:Char;
+  ps:TPascalString;
+  i:Integer;
+begin
+  ps:='123';
+  s:=ps;
+  ps:=s;
+
+  s:='';
+  for i:=1 to ps.len do
+    s:=s+ps[i];
+
+  ps:='';
+  for c in s do
+    ps:=ps+c;
+
+  ps.Append('456');
+  i:=ps.GetPos('234');
+end;
 
 
-兼容fpc $Mode OBJFPC,$Mode Delphi,$Mode DelphiUnicode
+```
+
 
 
 qq600585
