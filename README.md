@@ -15,7 +15,7 @@ var
   ps:TPascalString;
   i:Integer;
   likeness:Double;
-  diff1, diff2:string;
+  diff1, diff2:TPascalString;
 begin
   ps:='123';
   s:=ps;
@@ -38,10 +38,22 @@ begin
   
   //Smith–Waterman and out diff
   likeness := SmithWatermanCompare('ACAGGT', 'AAGGT', diff1, diff2);
+  
+  //long string > 64k support
+  likeness := SmithWatermanCompareLongString('ACAGGT', 'AAGGT');
 end;
 
 
 ```
+
+### 2018-3-2 with Smith–Waterman algorithm
+
+optimized matrix performance
+
+long string support 
+
+addnew CoreClasses.pas and zDefine.inc unit
+
 
 ### 2018-3-1
 
