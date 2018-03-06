@@ -8,6 +8,7 @@
 
 {$MODE objfpc}
 {$MODESWITCH AdvancedRecords}
+{$MODESWITCH nestedprocvars}
 {$NOTES OFF}
 
 {$ASMMODE intel}
@@ -57,7 +58,7 @@
 
 (*
   {$IFDEF FPC}
-  {$ELSE }
+  {$ELSE FPC}
   {$ENDIF FPC}
 
   {$IFNDEF FPC}
