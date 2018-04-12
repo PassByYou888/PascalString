@@ -56,6 +56,8 @@
 {$R-} { range check }
 {$A+} { Word Align Data }
 {$O-} { optimization }
+{$Q-} { Overflow checking }
+{$B-} { Complete boolean evaluation }
 
 (*
   {$IFDEF FPC}
