@@ -46,6 +46,12 @@ end;
 
 ```
 
+### 2018-5-21
+
+- Added FPC on unicode support: UPascalStrings.pas 
+- update Parallel core(fpc required package:MultiThreadProcsLaz)
+
+
 ### 2018-3-2 with Smith–Waterman algorithm
 
 optimized matrix performance
