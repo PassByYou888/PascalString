@@ -4,90 +4,133 @@
 { * https://github.com/PassByYou888/zTranslate                                 * }
 { * https://github.com/PassByYou888/zSound                                     * }
 { * https://github.com/PassByYou888/zAnalysis                                  * }
+{ * https://github.com/PassByYou888/zGameWare                                  * }
+{ * https://github.com/PassByYou888/zRasterization                             * }
 { ****************************************************************************** }
 {$IFDEF FPC}
+  {$MODE objfpc}
+  {$MODESWITCH AdvancedRecords}
+  {$NOTES OFF}
+  {$STACKFRAMES ON}
 
-{$MODE objfpc}
-{$MODESWITCH AdvancedRecords}
-{$MODESWITCH nestedprocvars}
-{$NOTES OFF}
+  {$DEFINE LITTLE_ENDIAN}
+  {$UNDEF BIG_ENDIAN}
+  {$IFDEF FPC_BIG_ENDIAN}
+    {$UNDEF LITTLE_ENDIAN}
+    {$DEFINE BIG_ENDIAN}
+  {$ENDIF}
 
-{$ASMMODE intel}
+  {$UNDEF FirstCharInZero}
 
-{$IFDEF FPC_BIG_ENDIAN}
-{$DEFINE BIG_ENDIAN}
-{$ENDIF}
+  {$UNDEF Delphi}
+  {$UNDEF FastMD5}
+  {$DEFINE parallel}
+  {$DEFINE OptimizationMemoryStreamMD5}
 
-{$UNDEF Delphi}
-{$UNDEF FastMD5}
-{$DEFINE parallel}
-{$DEFINE OptimizationMemoryStreamMD5}
-{$DEFINE CriticalSimulateAtomic}
+  // used Critical Simulate Atomic with TMonitor.Enter(obj) and TMonitor.Exit(obj)
+  // CriticalSimulateAtomic defined so performance to be reduced
+  {$DEFINE CriticalSimulateAtomic}
 
-{$ELSE}
+  // used soft Simulate Critical(ring)
+  // SoftCritical defined so performance to be reduced
+  // {$DEFINE SoftCritical}
 
-{$IFDEF ANDROID}
-{$DEFINE FirstCharInZero}
-{$ENDIF}
+  // {$DEFINE ANTI_DEAD_ATOMIC_LOCK}
 
-{$IFDEF IOS}
-{$DEFINE FirstCharInZero}
-{$ENDIF}
+  // Using Sequential Packet Model will consume more memory and reduce IO performance,
+  // it can memory communication status and facilitate us to return to the original scene.
+  // {$DEFINE SEQUENCE_PACKET}
 
-{$DEFINE Delphi}
-{$DEFINE FastMD5}
-{$DEFINE parallel}
-{$DEFINE OptimizationMemoryStreamMD5}
+  {$DEFINE release}
+  {$UNDEF debug}
+  {$DEFINE INLINE_ASM}
+  {$R-} { range check }
+  {$O-} { optimization }
+{$ELSE FPC}
+  {$DEFINE LITTLE_ENDIAN}
+  {$UNDEF BIG_ENDIAN}
 
-// used Critical Simulate Atomic with TMonitor.Enter(obj) and TMonitor.Exit(obj)
-// if CriticalSimulateAtomic defined so performance to be reduced
-// {$DEFINE CriticalSimulateAtomic}
+  {$IFDEF ANDROID}
+    {$DEFINE FirstCharInZero}
+  {$ENDIF}
 
-{$IFDEF Linux}
-{$DEFINE CriticalSimulateAtomic}
-{$UNDEF parallel}
-{$ENDIF}
+  {$IFDEF IOS}
+    {$DEFINE FirstCharInZero}
+  {$ENDIF}
 
-{$ENDIF}
+  {$DEFINE Delphi}
+  {$DEFINE FastMD5}
+  {$DEFINE parallel}
+  {$DEFINE OptimizationMemoryStreamMD5}
+
+  // used Critical Simulate Atomic with TMonitor.Enter(obj) and TMonitor.Exit(obj)
+  // CriticalSimulateAtomic defined so performance to be reduced
+  // {$DEFINE CriticalSimulateAtomic}
+
+  // used soft Simulate Critical(ring)
+  // SoftCritical defined so performance to be reduced
+  // {$DEFINE SoftCritical}
+
+  // {$DEFINE ANTI_DEAD_ATOMIC_LOCK}
+
+  // Using Sequential Packet Model will consume more memory and reduce IO performance,
+  // it can memory communication status and facilitate us to return to the original scene.
+  // {$DEFINE SEQUENCE_PACKET}
+
+  {$IFDEF release}
+    {$DEFINE INLINE_ASM}
+    {$R-} { range check }
+    {$I-} { Input output checking }
+    {$O+} { optimization }
+  {$ELSE}
+    {$UNDEF INLINE_ASM}
+    {$R+} { range check }
+    {$I+} { Input output checking }
+    {$O-} { optimization }
+  {$ENDIF}
+
+  {$IF Defined(Android) or Defined(IOS)}
+    {$DEFINE PhysicsIO_On_Indy}
+  {$ELSE}
+    // PhysicsIO interface
+    // {$DEFINE PhysicsIO_On_ICS}
+    {$DEFINE PhysicsIO_On_CrossSocket}
+    // {$DEFINE PhysicsIO_On_DIOCP}
+    // {$DEFINE PhysicsIO_On_Indy}
+    // {$DEFINE PhysicsIO_On_Synapse}
+  {$IFEND}
+{$ENDIF FPC}
 
 {$WARNINGS OFF}
 {$HINTS OFF}
 {$H+} { long string }
-{$R-} { range check }
 {$A+} { Word Align Data }
-{$O-} { optimization }
 {$Q-} { Overflow checking }
 {$B-} { Complete boolean evaluation }
-
-(*
-  {$IFDEF FPC}
-  {$ELSE FPC}
-  {$ENDIF FPC}
-
-  {$IFNDEF FPC}
-  {$ENDIF FPC}
-
-  {$Region 'RegionName'}
-  {$EndRegion}
-*)
-
-{$IFDEF release}
- {$DEFINE INLINE_ASM}
-{$ELSE}
- {$UNDEF INLINE_ASM}
-{$ENDIF}
+{$J+} { Writeable typed constants }
 
 {$UNDEF CPU64}
 
 {$IFDEF CPU64BITS}
- {$DEFINE CPU64}
-{$ELSE}
- {$IFDEF CPUX64}
   {$DEFINE CPU64}
- {$ENDIF}
+{$ELSE}
+  {$IFDEF CPUX64}
+    {$DEFINE CPU64}
+  {$ENDIF}
 {$ENDIF}
 
 {$IFNDEF CPU64}
- {$DEFINE CPU32}
+  {$DEFINE CPU32}
 {$ENDIF}
 
+{$IFDEF BIG_ENDIAN}
+  {$MESSAGE FATAL 'Big-endian system not supported'}
+{$ENDIF}
+
+{$IFOPT R+}
+  {$DEFINE RangeCheck}
+{$ENDIF}
+
+{$IFOPT Q+}
+  {$DEFINE OverflowCheck}
+{$ENDIF}
